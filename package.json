@@ -1,0 +1,16 @@
+{
+  "name": "social-pause",
+  "productName": "Social Pause",
+  "version": "0.1.0",
+  "description": "Social Pause prototype 0.1 — practice pausing before acting in everyday social situations.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . \"Social Pause\" --platform=darwin --arch=arm64 --out=dist --overwrite --ignore=^/dist"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^44.5.1"
+  }
+}

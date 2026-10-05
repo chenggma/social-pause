@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}body{margin:0}</style>
+<title>Social Pause</title>
+<meta name="theme-color" content="#E9EDEB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="停一下">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#E9EDEB; --surface:#F8FAF9; --surface-2:#F0F3F2; --ink:#1B2526; --muted:#566563; --line:#D0D8D5;
+  --accent:#2C4A8A; --accent-ink:#FFFFFF; --accent-soft:#E2E8F5;
+  --pause:#1E2D52; --pause-2:#2A3C68; --pause-ink:#E9EDF7; --pause-muted:#AEB9D6;
+  --good:#2D6A52; --good-soft:#E0EEE7; --note:#7A5A1E; --note-soft:#F4ECDC;
+  --wall:#E2E7E4; --floor:#D3DAD6; --table:#B8A487; --table-dark:#9C8A6E; --npc:#8D9A97; --npc-head:#A9B4B1;
+  --bag:#F1EBDD; --bag-line:#A99D84; --kraft:#C8A577; --phone:#2A3132; --glow:#BFD3F2;
+  --font:"Atkinson Hyperlegible","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111817; --surface:#18201F; --surface-2:#1E2726; --ink:#E2E8E6; --muted:#98A6A3; --line:#2B3634;
+    --accent:#93ACE6; --accent-ink:#0E1832; --accent-soft:#1E2A42;
+    --pause:#0F1834; --pause-2:#1A2550; --pause-ink:#E1E7F6; --pause-muted:#93A1C6;
+    --good:#7CC3A2; --good-soft:#1A2E26; --note:#E2BE7A; --note-soft:#2E2718;
+    --wall:#222B2A; --floor:#1A2221; --table:#6C5D4B; --table-dark:#574B3D; --npc:#5E6B69; --npc-head:#748280;
+    --bag:#CFC7B6; --bag-line:#8C826E; --kraft:#9C7F58; --phone:#0B0F10; --glow:#5F7FBF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111817; --surface:#18201F; --surface-2:#1E2726; --ink:#E2E8E6; --muted:#98A6A3; --line:#2B3634;
+  --accent:#93ACE6; --accent-ink:#0E1832; --accent-soft:#1E2A42;
+  --pause:#0F1834; --pause-2:#1A2550; --pause-ink:#E1E7F6; --pause-muted:#93A1C6;
+  --good:#7CC3A2; --good-soft:#1A2E26; --note:#E2BE7A; --note-soft:#2E2718;
+  --wall:#222B2A; --floor:#1A2221; --table:#6C5D4B; --table-dark:#574B3D; --npc:#5E6B69; --npc-head:#748280;
+  --bag:#CFC7B6; --bag-line:#8C826E; --kraft:#9C7F58; --phone:#0B0F10; --glow:#5F7FBF;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;padding:0 16px;padding-block:20px 40px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.topbar{max-width:1080px;margin:0 auto 18px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font-size:22px;letter-spacing:.01em}
+.brand .ver{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.lang button{border:0;background:transparent;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+.stage{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- phone ---------- */
+.phone{background:var(--surface);border:1px solid var(--line);border-radius:28px;overflow:hidden;min-height:700px;display:flex;flex-direction:column;position:relative;transition:background .5s ease;max-width:420px;width:100%;margin:0 auto}
+.phone.in-pause{background:var(--pause);color:var(--pause-ink);border-color:var(--pause)}
+.phone-top{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 0;font-size:13px;color:var(--muted)}
+.phone.in-pause .phone-top{color:var(--pause-muted)}
+.dots{display:flex;gap:6px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots i.done{background:var(--muted)}
+.dots i.now{background:var(--ink)}
+.phone.in-pause .dots i{background:var(--pause-2)} .phone.in-pause .dots i.now{background:var(--pause-ink)}
+.screen{flex:1;display:flex;flex-direction:column;padding:16px 20px 22px;gap:16px}
+.screen h2{font-size:22px;line-height:1.3;margin:0;text-wrap:balance}
+.screen p{margin:0}
+.lead{font-size:17px}
+.small{font-size:14px;color:var(--muted)}
+.phone.in-pause .small{color:var(--pause-muted)}
+.spacer{flex:1}
+
+.scene{border-radius:16px;overflow:hidden;background:var(--wall);border:1px solid var(--line)}
+.scene svg{display:block;width:100%;height:auto}
+
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 16px;font-size:16px;line-height:1.4;cursor:pointer;min-height:52px}
+.choice:hover{border-color:var(--muted)}
+.choice.picked{border-color:var(--accent);background:var(--accent-soft)}
+.phone.in-pause .choice{background:var(--pause-2);border-color:transparent;color:var(--pause-ink)}
+.phone.in-pause .choice.picked{border-color:var(--pause-ink)}
+.choice:disabled{cursor:default}
+
+.primary{border:0;background:var(--ink);color:var(--surface);border-radius:14px;padding:15px 18px;font-size:16px;font-weight:700;cursor:pointer;width:100%}
+.phone.in-pause .primary{background:var(--pause-ink);color:var(--pause)}
+.ghost{border:1.5px solid var(--line);background:transparent;border-radius:14px;padding:13px 18px;font-size:15px;cursor:pointer;width:100%}
+
+.bubble{background:var(--surface-2);border-radius:4px 16px 16px 16px;padding:12px 14px;font-size:16px}
+.bubble .who{display:block;font-size:12px;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+.narr{font-size:15px;color:var(--muted);font-style:italic}
+.reply{border-left:3px solid var(--pause-muted);padding:4px 0 4px 12px;font-size:15px}
+
+/* the pause control: same place every time */
+.pausebar{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:1.5px dashed var(--line)}
+.pausebar.loud{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.pausebar .plabel{font-size:15px;flex:1}
+.hold{position:relative;width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;flex:none;touch-action:none;-webkit-user-select:none;user-select:none}
+.hold svg{position:absolute;inset:-5px;width:66px;height:66px;pointer-events:none}
+.hold .bars{display:flex;gap:5px;justify-content:center}
+.hold .bars i{width:5px;height:18px;border-radius:2px;background:currentColor}
+.pausebar.quiet .hold{width:44px;height:44px;background:var(--surface-2);color:var(--muted);border:1.5px solid var(--line)}
+.pausebar.quiet .hold svg{inset:-5px;width:54px;height:54px}
+.pausebar.quiet .hold .bars i{width:4px;height:14px}
+.loud .hold{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 var(--glow)}50%{box-shadow:0 0 0 10px transparent}}
+.paused-chip{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--good);background:var(--good-soft);padding:6px 12px;border-radius:999px;align-self:flex-start}
+
+.explicit{background:var(--pause);color:var(--pause-ink);border-radius:16px;padding:22px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.explicit strong{font-size:22px}
+.explicit .hold{width:76px;height:76px;background:var(--pause-ink);color:var(--pause)}
+.explicit .hold svg{width:86px;height:86px}
+
+.pause-hero{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:8px;text-align:center}
+.pause-hero .mark{display:flex;gap:8px}
+.pause-hero .mark i{width:9px;height:34px;border-radius:3px;background:var(--pause-ink)}
+.pause-hero span{font-size:13px;letter-spacing:.14em;color:var(--pause-muted)}
+
+.fb{display:grid;gap:12px}
+.fb .row{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:baseline}
+.fb .k{font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.learn{background:var(--surface-2);border-radius:14px;padding:14px 16px;font-size:17px;font-weight:700;line-height:1.45}
+
+.home-mark{display:flex;gap:10px;margin-top:40px}
+.home-mark i{width:14px;height:56px;border-radius:4px;background:var(--accent)}
+.stat-line{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding:10px 0;font-size:16px}
+.stat-line b{font-size:22px;font-variant-numeric:tabular-nums}
+
+/* ---------- facilitator ---------- */
+.fac{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.fac-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fac-head h2{margin:0;font-size:17px}
+.fac-head .small{font-size:13px}
+.sec-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px}
+.ctl{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;width:max-content;max-width:100%}
+.seg button{border:0;background:transparent;padding:6px 12px;font-family:var(--mono);font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tog{display:flex;align-items:center;gap:8px;cursor:pointer}
+.tog input{width:18px;height:18px;accent-color:var(--accent)}
+.example-flag{font-size:12px;color:var(--note);background:var(--note-soft);border-radius:999px;padding:3px 10px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile.key{border-color:var(--accent);background:var(--accent-soft)}
+.tile .t{font-size:12px;color:var(--muted);line-height:1.3}
+.tile .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .d{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.chart{border:1px solid var(--line);border-radius:12px;padding:8px 10px 6px}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:4px 2px 2px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;letter-spacing:.06em;color:var(--muted);font-weight:400;text-transform:uppercase}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+tr:last-child td{border-bottom:0}
+.lv{font-family:var(--mono);font-size:12px;padding:1px 7px;border-radius:6px;background:var(--surface-2)}
+.ok{color:var(--good);font-weight:700}
+.no{color:var(--note)}
+.exports{display:flex;gap:10px;flex-wrap:wrap}
+.exports button{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 14px;font-size:14px;cursor:pointer}
+.exports .status{font-size:13px;color:var(--muted);align-self:center}
+textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink);padding:10px}
+.empty{font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+html{-webkit-text-size-adjust:100%}
+button{touch-action:manipulation}
+.hold{-webkit-touch-callout:none}
+#brandName{cursor:default;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media (max-width:600px){
+  body{padding:0;padding-block:0}
+  .topbar{margin:0;padding:calc(env(safe-area-inset-top, 0px) + 10px) 16px 8px}
+  .brand h1{font-size:18px}
+  .brand .ver{display:none}
+  .topbar{flex-wrap:nowrap;align-items:center}
+  .stage{gap:0}
+  .phone{border:0;border-radius:0;max-width:none;min-height:calc(100dvh - 56px - env(safe-area-inset-top, 0px))}
+  .screen{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 22px)}
+  .fac{display:none;border-radius:0;border-left:0;border-right:0}
+  body.fac-open .fac{display:flex}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><h1 id="brandName">Social Pause</h1><span class="ver" id="verTag">prototype 0.1 · food bag</span></div>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" id="lang-zh" data-lang="zh">中文</button>
+    <button type="button" id="lang-en" data-lang="en">EN</button>
+  </div>
+</header>
+
+<main class="stage">
+  <section class="phone" id="phone" aria-live="polite">
+    <div class="phone-top"><span id="phoneLabel"></span><span class="dots" id="dots"></span></div>
+    <div class="screen" id="screen"></div>
+  </section>
+
+  <aside class="fac" id="fac"></aside>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= content ================= */
+const UI = {
+  tagline:{zh:"在“我想这样做”和“这会怎么影响对方”之间，练习停一下。",en:"Practice the moment between “I want to do this” and “how might this affect them?”"},
+  start:{zh:"开始练习",en:"Start practice"},
+  homeMeta:{zh:"5 个日常场景 · 大约 5 分钟 · 没有计时",en:"5 everyday situations · about 5 minutes · no timer"},
+  homeHow:{zh:"每个场景里，你都可以随时按住 ⏸ 停一下，再做决定。",en:"In every situation you can press and hold ⏸ to pause before you decide."},
+  cont:{zh:"继续",en:"Continue"},
+  intentQ:{zh:"你注意到了什么？你想做什么？",en:"What do you notice? What do you want to do?"},
+  intentOther:{zh:"没什么特别想做的",en:"Nothing in particular"},
+  decideCurious:{zh:"想知道很正常。你会怎么做？",en:"Being curious is fine. What will you do?"},
+  decideOther:{zh:"假设你有一点好奇。你会怎么做？",en:"Say you're a little curious. What will you do?"},
+  decideAfter:{zh:"你停下来想过了。现在你会怎么做？",en:"You paused and thought about it. What will you do now?"},
+  explicit:{zh:"停一下。想想对方。",en:"Stop. Think about the other person."},
+  explicitHint:{zh:"按住这个按钮，选项会出现。",en:"Press and hold. Your options will appear."},
+  pauseLoud:{zh:"先停一下？按住 ⏸",en:"Pause first? Press and hold ⏸"},
+  pauseQuiet:{zh:"停一下",en:"Pause"},
+  pauseTapLoud:{zh:"先停一下？点 ⏸",en:"Pause first? Tap ⏸"},
+  pausedChip:{zh:"已经停下来想过",en:"You paused"},
+  pauseWord:{zh:"停 一 下",en:"P A U S E"},
+  backToScene:{zh:"回到现场",en:"Back to the moment"},
+  whatNext:{zh:"接下来你可以怎么做？",en:"What could you do now?"},
+  next:{zh:"下一个场景",en:"Next situation"},
+  finish:{zh:"看看这一轮",en:"See this round"},
+  fbNotice:{zh:"你做了",en:"Noticed"}, fbWhy:{zh:"为什么",en:"Why"}, fbNext:{zh:"下次",en:"Next time"},
+  selfPaused:{zh:"你自己停下来想了想。",en:"You paused on your own."},
+  repaired:{zh:"你后来补救了，这很重要。",en:"You repaired it afterwards. That counts."},
+  endTitle:{zh:"这一轮做完了",en:"Round complete"},
+  endPaused:{zh:"你停下来想一想",en:"Times you paused"},
+  endAsked:{zh:"你先问、或先等",en:"Times you asked or waited first"},
+  endRepair:{zh:"出错后你补救了",en:"Times you repaired a misstep"},
+  times:{zh:"次",en:""},
+  again:{zh:"再练一轮",en:"Practice again"},
+  home:{zh:"回到首页",en:"Back to start"},
+  takeaways:{zh:"这一轮的几句话",en:"From this round"},
+  of:{zh:"/",en:"/"},
+};
+
+const NAMES = {lin:{zh:"小林",en:"Lin"},zhou:{zh:"小周",en:"Zhou"},ning:{zh:"阿宁",en:"Ning"},group:{zh:"工作群",en:"Team chat"},cow:{zh:"同事",en:"Coworker"}};
+
+const SC = [
+{ id:"food_bag_01", domain:"personal_boundary", d:1, transfer:0, setting:"room", object:"takeout", npc:"lin",
+  sit:{zh:"你到小林家玩。桌上放着一个外卖袋，袋口折起来了。小林在厨房给你倒水。",en:"You're at Lin's place. A takeout bag sits on the table, its top folded over. Lin is in the kitchen getting you some water."},
+  intent:{zh:"我想知道袋子里是什么",en:"I want to know what's in the bag"},
+  cue:{who:"lin",zh:"（从厨房探出头）桌上那个是我刚到的晚饭。",en:"(leaning out of the kitchen) That's my dinner on the table. Just arrived."},
+  owner:{q:{zh:"这个袋子是谁的？",en:"Whose bag is it?"},opts:[
+    {id:"mine",l:{zh:"我的",en:"Mine"},ok:0,r:{zh:"它在你来之前就在桌上了，应该不是你的。",en:"It was on the table before you arrived, so it's probably not yours."}},
+    {id:"other",l:{zh:"小林的",en:"Lin's"},ok:1,r:{zh:"对，是小林的东西。",en:"Right. It belongs to Lin."}},
+    {id:"unsure",l:{zh:"不确定",en:"Not sure"},ok:1,r:{zh:"不确定的时候，可以先当作是别人的，或者问一下。",en:"When you're not sure, treat it as someone else's, or ask."}}]},
+  persp:{q:{zh:"如果你不问就打开，小林可能会怎么想？",en:"If you open it without asking, what might Lin think?"},opts:[
+    {id:"uneasy",l:{zh:"可能会有点不舒服",en:"Lin might feel a bit uncomfortable"},ok:1,r:{zh:"有可能。东西是小林的，小林也许想自己决定给不给人看。",en:"Possibly. It's Lin's, and Lin may want to decide who sees it."}},
+    {id:"fine",l:{zh:"可能不在意",en:"Lin might not mind"},ok:1,r:{zh:"也有可能。但我们没法确定，所以先问一句最稳。",en:"That's possible too. We can't know for sure, so asking first is the safe move."}},
+    {id:"unsure",l:{zh:"我不确定",en:"I'm not sure"},ok:1,r:{zh:"不确定很正常。不确定的时候，问一下就知道了。",en:"Not knowing is normal. When you're not sure, asking tells you."}}]},
+  actions:[
+    {id:"open",l:{zh:"直接打开看看",en:"Open it and look"},ok:0,npc:{zh:"哎，那是我的……",en:"Oh, that's mine…"},narr:{zh:"小林停了一下，看起来有点意外。",en:"Lin stops for a second and looks a little surprised."},state:"open"},
+    {id:"sniff",l:{zh:"拿起来闻一闻",en:"Pick it up and smell it"},ok:0,npc:{zh:"嗯？你饿了吗？",en:"Hm? Are you hungry?"},narr:{zh:"小林看着你手里的袋子。",en:"Lin is looking at the bag in your hand."},state:"lifted"},
+    {id:"ask_what",l:{zh:"问：“你点了什么呀？”",en:"Ask: “What did you order?”"},ok:1,npc:{zh:"麻辣烫！你要不要尝一口？",en:"Spicy hot pot! Want a bite?"},state:"base"},
+    {id:"ask_look",l:{zh:"问：“我可以看看吗？”",en:"Ask: “Can I take a look?”"},ok:1,npc:{zh:"可以啊，你看吧。",en:"Sure, go ahead."},state:"open"}],
+  repair:[
+    {id:"sorry",l:{zh:"放回去，说：“不好意思，我应该先问一下。”",en:"Put it back and say: “Sorry, I should have asked.”"},ok:1,npc:{zh:"没事，下次问一声就好。是麻辣烫，要不要尝尝？",en:"No worries, just ask next time. It's hot pot, want some?"}},
+    {id:"ask_now",l:{zh:"放回去，然后问：“我可以看看吗？”",en:"Put it back, then ask: “Can I look?”"},ok:1,npc:{zh:"可以啊。下次先问就好。",en:"Sure. Just ask first next time."}},
+    {id:"keep",l:{zh:"继续看",en:"Keep looking"},ok:0,narr:{zh:"小林把袋子拿了回去，没有说话。",en:"Lin takes the bag back without saying anything."}},
+    {id:"silent",l:{zh:"什么也不说",en:"Say nothing"},ok:0,narr:{zh:"小林把袋子挪到了另一边。屋里安静了一会儿。",en:"Lin moves the bag to the other side. It's quiet for a moment."}}],
+  fb:{notice:{zh:"你注意到袋子是小林的，然后先问了。",en:"You noticed the bag was Lin's, and you asked first."},
+      why:{zh:"先问一句，小林就有机会自己决定要不要分享。",en:"Asking gives Lin the chance to decide whether to share."},
+      next:{zh:"伸手之前，先说：“我可以看看吗？”",en:"Before reaching, say: “Can I take a look?”"}},
+  learn:{zh:"可以好奇，同时先问一句，再碰别人的东西。",en:"You can be curious and still ask before touching someone else's things."}},
+
+{ id:"food_bag_02", domain:"personal_boundary", d:2, transfer:0, setting:"office", object:"kraft", npc:"zhou",
+  sit:{zh:"午休时间，你路过同事小周的工位。桌上有一个面包店的纸袋，闻起来很香。小周正在打电话。",en:"It's lunch break. You walk past your coworker Zhou's desk. There's a bakery bag on it that smells great. Zhou is on a phone call."},
+  intent:{zh:"我想知道纸袋里是什么",en:"I want to know what's in the bag"},
+  cue:{who:"zhou",zh:"（一边打电话，一边把纸袋往自己那边挪了挪）",en:"(still on the phone, slides the bag a little closer)"},
+  owner:{q:{zh:"这个纸袋是谁的？",en:"Whose bag is it?"},opts:[
+    {id:"mine",l:{zh:"我的",en:"Mine"},ok:0,r:{zh:"它在小周的桌上，不是你的。",en:"It's on Zhou's desk, so it isn't yours."}},
+    {id:"other",l:{zh:"小周的",en:"Zhou's"},ok:1,r:{zh:"对，是小周的。",en:"Right, it's Zhou's."}},
+    {id:"unsure",l:{zh:"不确定",en:"Not sure"},ok:1,r:{zh:"它在小周的桌上，很可能是小周的。",en:"It's on Zhou's desk, so it's most likely Zhou's."}}]},
+  persp:{q:{zh:"小周在打电话。如果你这时候去翻纸袋，小周可能会怎么想？",en:"Zhou is on a call. If you open the bag now, what might Zhou think?"},opts:[
+    {id:"uneasy",l:{zh:"可能会觉得被打扰",en:"Zhou might feel interrupted"},ok:1,r:{zh:"有可能。小周在忙，东西也是小周的。",en:"Possibly. Zhou is busy, and the bag is Zhou's."}},
+    {id:"fine",l:{zh:"可能不在意",en:"Zhou might not mind"},ok:1,r:{zh:"也有可能，但没法确定。等小周有空再问更稳。",en:"Maybe, but you can't be sure. Asking when Zhou is free is safer."}},
+    {id:"unsure",l:{zh:"我不确定",en:"I'm not sure"},ok:1,r:{zh:"不确定没关系。可以等一等，再问。",en:"That's okay. You can wait, then ask."}}]},
+  actions:[
+    {id:"peek",l:{zh:"打开纸袋看一眼",en:"Open the bag and peek"},ok:0,npc:{zh:"嗯？有事吗？",en:"Hm? Need something?"},narr:{zh:"小周停下了通话，看着你。",en:"Zhou pauses the call and looks at you."},state:"open"},
+    {id:"take",l:{zh:"拿一块尝尝",en:"Take a piece to try"},ok:0,npc:{zh:"诶——",en:"Hey—"},narr:{zh:"小周捂住话筒，看起来有点惊讶。",en:"Zhou covers the phone and seems surprised."},state:"lifted"},
+    {id:"wait_ask",l:{zh:"等小周打完电话，再问是哪家买的",en:"Wait until the call ends, then ask where it's from"},ok:1,npc:{zh:"楼下新开的那家，很好吃。你要不要来一个？",en:"The new place downstairs. It's good. Want one?"},state:"base"},
+    {id:"leave",l:{zh:"先回自己座位",en:"Go back to your own desk"},ok:1,narr:{zh:"你回到座位。之后想知道的话，还可以再问。",en:"You go back to your desk. You can still ask later."},state:"base"}],
+  repair:[
+    {id:"sorry",l:{zh:"放下，说：“不好意思打扰了，我一会儿再问你。”",en:"Put it down: “Sorry to interrupt, I'll ask you later.”"},ok:1,npc:{zh:"（点点头）好，一会儿找你。",en:"(nods) Sure, talk in a bit."}},
+    {id:"explain",l:{zh:"说：“我就是好奇是什么。”",en:"Say: “I was just curious what it was.”"},ok:0,narr:{zh:"小周点点头，继续打电话，把纸袋放进了抽屉。",en:"Zhou nods, keeps talking, and puts the bag in a drawer."}},
+    {id:"silent",l:{zh:"走开",en:"Walk away"},ok:0,narr:{zh:"小周看了你一眼，继续打电话。",en:"Zhou glances at you and goes back to the call."}}],
+  fb:{notice:{zh:"你注意到小周在忙，等合适的时候再问。",en:"You noticed Zhou was busy and waited for a better moment."},
+      why:{zh:"等对方方便的时候再问，对方更容易好好回答你。",en:"When you ask at a good time, people can actually answer you."},
+      next:{zh:"先等一等，再问：“这是哪家买的？”",en:"Wait a moment, then ask: “Where's that from?”"}},
+  learn:{zh:"想知道的事，可以留到对方方便的时候再问。",en:"What you want to know can wait until the other person is free."}},
+
+{ id:"food_bag_03", domain:"personal_boundary", d:3, transfer:0, setting:"kitchen", object:"fridge", npc:"cow",
+  sit:{zh:"公司茶水间的冰箱里有一个塑料袋，没写名字，里面好像是葡萄。冰箱门上贴着：“周五统一清理”。今天是周三。",en:"In the office fridge there's a plastic bag with no name on it. It looks like grapes. A note on the door says “Fridge cleared on Fridays.” Today is Wednesday."},
+  intent:{zh:"我想吃几颗葡萄",en:"I'd like a few grapes"},
+  cue:{who:"cow",zh:"（路过）那个袋子好像是谁早上放进去的。",en:"(walking by) I think someone put that bag in this morning."},
+  owner:{q:{zh:"这袋葡萄是谁的？",en:"Whose grapes are these?"},opts:[
+    {id:"mine",l:{zh:"我的",en:"Mine"},ok:0,r:{zh:"不是你放的，所以不是你的。",en:"You didn't put them there, so they aren't yours."}},
+    {id:"shared",l:{zh:"公司大家的",en:"Everyone's, for sharing"},ok:0,r:{zh:"有可能。但没写名字，不一定代表是大家的。",en:"Maybe. But no name doesn't mean it's for everyone."}},
+    {id:"other",l:{zh:"某个同事的",en:"Some coworker's"},ok:1,r:{zh:"有可能。冰箱里的东西大多是有人自己带的。",en:"Likely. Most things in the fridge belong to someone."}},
+    {id:"unsure",l:{zh:"不确定",en:"Not sure"},ok:1,r:{zh:"对，光看是没法确定的。这正是该问一下的时候。",en:"Right, you can't tell by looking. This is exactly when to ask."}}]},
+  persp:{q:{zh:"如果这袋葡萄是某个同事带的，被人吃了，那个同事可能会怎么想？",en:"If a coworker brought these and someone ate them, how might that coworker feel?"},opts:[
+    {id:"uneasy",l:{zh:"可能会不高兴，或者觉得奇怪",en:"Annoyed, or confused"},ok:1,r:{zh:"有可能。自己带的东西少了，很多人会在意。",en:"Possibly. Many people notice when their food goes missing."}},
+    {id:"fine",l:{zh:"可能不在意",en:"They might not mind"},ok:1,r:{zh:"也有可能，但没法确定。问一句就不用猜。",en:"Maybe, but you can't know. Asking means you don't have to guess."}},
+    {id:"unsure",l:{zh:"我不确定",en:"I'm not sure"},ok:1,r:{zh:"不确定很正常。所以可以先问。",en:"That's normal. That's why asking helps."}}]},
+  actions:[
+    {id:"eat",l:{zh:"拿几颗吃",en:"Eat a few"},ok:0,who:"group",npc:{zh:"“冰箱里我的葡萄少了一些，有人看到吗？”",en:"“Some of my grapes in the fridge are gone. Anyone know?”"},narr:{zh:"下午，工作群里有人问：",en:"That afternoon, someone posts in the team chat:"},state:"open"},
+    {id:"open",l:{zh:"打开袋子看看",en:"Open the bag to check"},ok:0,who:"cow",npc:{zh:"那是我的葡萄……你想吃吗？",en:"Those are my grapes… did you want some?"},narr:{zh:"这时有同事走进茶水间，看着你手里的袋子。",en:"A coworker walks in and looks at the bag in your hands."},state:"lifted",
+      repair:[
+        {id:"sorry",l:{zh:"说：“不好意思，我不知道是谁的，就打开看了。”",en:"Say: “Sorry, I didn't know whose it was, so I looked.”"},ok:1,npc:{zh:"没事，我下次写上名字。",en:"No problem. I'll put my name on it next time."}},
+        {id:"take",l:{zh:"拿一颗尝尝",en:"Take one anyway"},ok:0,narr:{zh:"那位同事把袋子拿走了。",en:"The coworker takes the bag away."}},
+        {id:"silent",l:{zh:"关上冰箱，走开",en:"Close the fridge and leave"},ok:0,narr:{zh:"那位同事看着你离开，没说什么。",en:"The coworker watches you go and says nothing."}}]},
+    {id:"ask_group",l:{zh:"在群里问：“冰箱里那袋葡萄是谁的？”",en:"Ask in the team chat: “Whose grapes are in the fridge?”"},ok:1,who:"group",npc:{zh:"“我的！想吃的话自己拿～”",en:"“Mine! Help yourself.”"},state:"base"},
+    {id:"leave",l:{zh:"不动它",en:"Leave it alone"},ok:1,narr:{zh:"你关上了冰箱。袋子还在原处。",en:"You close the fridge. The bag stays where it was."},state:"base"}],
+  repair:[
+    {id:"sorry",l:{zh:"回复：“是我吃的，不好意思，我明天买点补上。”",en:"Reply: “That was me, sorry. I'll bring some tomorrow.”"},ok:1,who:"group",npc:{zh:"“没事没事，下次说一声就行。”",en:"“No worries, just say something next time.”"}},
+    {id:"explain",l:{zh:"回复：“我以为是大家的，不好意思。”",en:"Reply: “I thought they were for everyone. Sorry.”"},ok:1,who:"group",npc:{zh:"“没关系，我下次写上名字。”",en:"“All good, I'll label them next time.”"}},
+    {id:"silent",l:{zh:"不回复",en:"Don't reply"},ok:0,narr:{zh:"群里没人回答。那位同事又问了一次。",en:"Nobody answers. The coworker asks again."}}],
+  fb:{notice:{zh:"你没有因为“没写名字”就当作是大家的，而是先确认。",en:"You didn't assume “no name” meant “for everyone.” You checked first."},
+      why:{zh:"东西是谁的不确定时，问一句就不用猜。",en:"When you don't know whose it is, asking saves you from guessing."},
+      next:{zh:"先问：“这是谁的？”",en:"Ask first: “Whose is this?”"}},
+  learn:{zh:"不确定是谁的，就先当作是别人的，或者问一下。",en:"If you don't know whose it is, treat it as someone else's, or ask."}},
+
+{ id:"food_bag_04", domain:"personal_boundary", d:4, transfer:0, setting:"room2", object:"snacks", npc:"ning",
+  sit:{zh:"你第一次去新朋友阿宁家。阿宁说：“随便坐，别客气！”然后去了厨房。茶几上有一袋开着口的零食。",en:"It's your first visit to your new friend Ning's home. Ning says “Make yourself at home!” and goes to the kitchen. There's an open bag of snacks on the coffee table."},
+  intent:{zh:"我想吃点零食",en:"I'd like some of the snacks"},
+  cue:{who:"ning",zh:"（在厨房里）想吃什么跟我说啊！",en:"(from the kitchen) Tell me if you want anything!"},
+  owner:{q:{zh:"这袋零食是谁的？",en:"Whose snacks are these?"},opts:[
+    {id:"mine",l:{zh:"我的",en:"Mine"},ok:0,r:{zh:"这是阿宁家，零食应该是阿宁的。",en:"This is Ning's home, so they're probably Ning's."}},
+    {id:"other",l:{zh:"阿宁的",en:"Ning's"},ok:1,r:{zh:"对，在阿宁家，是阿宁的。",en:"Right. Ning's home, Ning's snacks."}},
+    {id:"unsure",l:{zh:"不确定",en:"Not sure"},ok:1,r:{zh:"在阿宁家，很可能是阿宁的。",en:"It's Ning's home, so they're most likely Ning's."}}]},
+  persp:{q:{zh:"阿宁说“别客气”。这包括可以吃这袋零食吗？",en:"Ning said “make yourself at home.” Does that include these snacks?"},opts:[
+    {id:"yes",l:{zh:"包括",en:"Yes"},ok:0,r:{zh:"有可能。不过“别客气”常常是说放松，不一定是说桌上的东西都能吃。",en:"Maybe. But it often means “relax,” not “everything here is yours.”"}},
+    {id:"no",l:{zh:"不包括",en:"No"},ok:1,r:{zh:"也有可能。说实话，我们没法确定。",en:"Could be. Honestly, we can't tell."}},
+    {id:"unsure",l:{zh:"我不确定",en:"I'm not sure"},ok:1,r:{zh:"对，这里确实不确定。不确定的时候，问一句最清楚。",en:"Right, this one really is unclear. When it's unclear, asking is clearest."}}]},
+  actions:[
+    {id:"eat",l:{zh:"拿几块吃",en:"Eat a few"},ok:0,npc:{zh:"啊，那包是给我妹妹留的……没事没事。",en:"Oh, I was saving those for my sister… it's fine, it's fine."},narr:{zh:"阿宁笑了笑，把袋子收进了柜子。",en:"Ning smiles and puts the bag in a cupboard."},state:"open"},
+    {id:"browse",l:{zh:"翻一翻，看看有什么口味",en:"Dig through to see the flavors"},ok:0,npc:{zh:"哦，你想吃这个？",en:"Oh, do you want those?"},narr:{zh:"阿宁看着你手里的袋子。",en:"Ning looks at the bag in your hands."},state:"lifted"},
+    {id:"ask",l:{zh:"问：“这个零食我可以吃吗？”",en:"Ask: “Is it okay if I have some of these?”"},ok:1,npc:{zh:"这包是给我妹妹留的，我给你拿别的！",en:"Those are for my sister. Let me get you something else!"},state:"base"},
+    {id:"wait",l:{zh:"等阿宁回来再说",en:"Wait for Ning to come back"},ok:1,npc:{zh:"（端着水果回来）来，吃这个！",en:"(back with fruit) Here, have some of this!"},state:"base"}],
+  repair:[
+    {id:"sorry",l:{zh:"说：“不好意思，我应该先问一下。”",en:"Say: “Sorry, I should have asked.”"},ok:1,npc:{zh:"没关系！你第一次来嘛。下次直接问我就行。",en:"That's okay! It's your first time here. Just ask me next time."}},
+    {id:"ask_now",l:{zh:"问：“这个是不是不能吃？”",en:"Ask: “Were these not for eating?”"},ok:1,npc:{zh:"是给我妹妹留的，不过没事，我拿别的给你。",en:"They're for my sister, but it's fine. I'll get you something else."}},
+    {id:"keep",l:{zh:"继续吃",en:"Keep eating"},ok:0,narr:{zh:"阿宁没有再说什么，去厨房拿了别的零食。",en:"Ning doesn't say anything else and gets other snacks from the kitchen."}}],
+  fb:{notice:{zh:"你没有把“别客气”当成一定可以吃，而是先问了。",en:"You didn't treat “make yourself at home” as a yes. You asked."},
+      why:{zh:"同一句话可能有不同意思。不确定的时候，问一句，你和阿宁都更轻松。",en:"The same words can mean different things. Asking makes it easier for both of you."},
+      next:{zh:"问：“这个我可以吃吗？”",en:"Ask: “Can I have some of these?”"}},
+  learn:{zh:"别人的话可能有不同意思。不确定的时候，可以问。",en:"What people say can mean more than one thing. When unsure, ask."}},
+
+{ id:"phone_01", domain:"personal_boundary", d:5, transfer:1, setting:"cafe", object:"phone", npc:"lin",
+  sit:{zh:"你和小林在咖啡店。小林去柜台点单，手机留在了桌上。屏幕亮了，有一条新消息，能看到开头几个字。",en:"You're at a café with Lin. Lin goes to order and leaves their phone on the table. The screen lights up with a new message. You can see the first few words."},
+  intent:{zh:"我想知道消息写了什么",en:"I want to know what the message says"},
+  cue:{who:"lin",zh:"（在柜台回头看了一眼桌子）",en:"(glances back at the table from the counter)"},
+  owner:{q:{zh:"这部手机和这条消息是谁的？",en:"Whose phone and message is this?"},opts:[
+    {id:"mine",l:{zh:"我的",en:"Mine"},ok:0,r:{zh:"手机是小林留下的，不是你的。",en:"Lin left the phone, so it isn't yours."}},
+    {id:"other",l:{zh:"小林的",en:"Lin's"},ok:1,r:{zh:"对。手机和消息都是小林的。",en:"Right. The phone and the message are both Lin's."}},
+    {id:"unsure",l:{zh:"不确定",en:"Not sure"},ok:1,r:{zh:"是小林留在桌上的，所以是小林的。",en:"Lin left it on the table, so it's Lin's."}}]},
+  persp:{q:{zh:"如果你看了小林的消息，小林可能会怎么想？",en:"If you read Lin's message, what might Lin think?"},opts:[
+    {id:"uneasy",l:{zh:"可能会觉得不舒服",en:"Lin might feel uncomfortable"},ok:1,r:{zh:"有可能。消息也是别人的东西，和袋子一样。",en:"Possibly. A message belongs to someone, just like a bag."}},
+    {id:"fine",l:{zh:"可能不在意",en:"Lin might not mind"},ok:1,r:{zh:"也有可能，但消息常常是私人的。没法确定时，先不看。",en:"Maybe, but messages are often private. When you can't tell, don't look."}},
+    {id:"unsure",l:{zh:"我不确定",en:"I'm not sure"},ok:1,r:{zh:"不确定很正常。可以先不看，等小林回来。",en:"That's normal. You can leave it and wait for Lin."}}]},
+  actions:[
+    {id:"read",l:{zh:"拿起手机，看完整消息",en:"Pick up the phone and read the whole message"},ok:0,npc:{zh:"你在看我的消息吗？",en:"Are you reading my messages?"},narr:{zh:"小林回来时，看到你拿着手机。小林的声音比平时小。",en:"Lin comes back and sees you holding the phone. Lin's voice is quieter than usual."},state:"lifted"},
+    {id:"glance",l:{zh:"凑近看看屏幕上的字",en:"Lean in to read the screen"},ok:0,npc:{zh:"嗯？怎么了？",en:"Hm? What is it?"},narr:{zh:"小林回来，看到你在看手机屏幕。",en:"Lin comes back and sees you looking at the screen."},state:"open"},
+    {id:"tell",l:{zh:"不看，等小林回来说：“你手机刚才亮了。”",en:"Don't look. When Lin returns: “Your phone just lit up.”"},ok:1,npc:{zh:"哦，谢谢！可能是我妈。",en:"Oh, thanks! Probably my mom."},state:"base"},
+    {id:"ignore",l:{zh:"不看，继续喝咖啡",en:"Don't look, keep drinking your coffee"},ok:1,narr:{zh:"小林回来，拿起手机看了看。",en:"Lin comes back and checks the phone."},state:"base"}],
+  repair:[
+    {id:"sorry",l:{zh:"放下手机，说：“对不起，我不应该看。”",en:"Put it down: “Sorry, I shouldn't have looked.”"},ok:1,npc:{zh:"嗯……没关系。下次别看就好。",en:"Hm… okay. Just don't next time."}},
+    {id:"minimize",l:{zh:"说：“我只看了一点点。”",en:"Say: “I only saw a little.”"},ok:0,narr:{zh:"小林把手机放进了口袋。",en:"Lin puts the phone away."}},
+    {id:"silent",l:{zh:"不说话",en:"Say nothing"},ok:0,narr:{zh:"小林把手机放进口袋，过了一会儿才继续聊天。",en:"Lin pockets the phone. It takes a while before you talk again."}}],
+  fb:{notice:{zh:"你注意到手机是小林的，没有去看消息。",en:"You noticed the phone was Lin's and didn't read the message."},
+      why:{zh:"消息和袋子一样，都是别人的。告诉小林手机亮了，小林可以自己决定看不看。",en:"A message is someone's, just like a bag. Telling Lin lets Lin decide."},
+      next:{zh:"说：“你手机刚才亮了。”",en:"Say: “Your phone just lit up.”"}},
+  learn:{zh:"别人的东西不只是能摸到的东西，消息和手机也是。",en:"Someone's things aren't only objects. Their phone and messages count too."}}
+];
+
+/* ================= state ================= */
+const HOLD_MS = 900;
+const LEVEL_NAME = {3:"P3",2:"P2",1:"P1",0:"P0"};
+const state = {
+  lang:"zh",
+  settings:{startLevel:3, adaptive:true, fadeAfter:1, tapPause:false},
+  sessionId:newId(), round:1, order:[0,1,2,3,4], idx:0, level:3, streak:0,
+  trials:[], screen:"home", cur:null, pick:null
+};
+try{ const s=localStorage.getItem("sp_lang"); if(s==="en"||s==="zh") state.lang=s; }catch(e){}
+
+function newId(){ return "S"+Date.now().toString(36).slice(-5).toUpperCase(); }
+const L = o => o==null ? "" : (typeof o==="string" ? o : (o[state.lang] ?? o.zh));
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const T = k => L(UI[k]);
+const sc = () => SC[state.order[state.idx]];
+const nm = k => L(NAMES[k]);
+
+/* ================= scene drawing ================= */
+function person(x, y, label){
+  return `<g><rect x="${x-17}" y="${y}" width="34" height="58" rx="15" fill="var(--npc)"/>
+    <circle cx="${x}" cy="${y-14}" r="14" fill="var(--npc-head)"/>
+    <text x="${x}" y="${y+76}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--font)">${esc(label)}</text></g>`;
+}
+function table(x1,x2,y){
+  return `<rect x="${x1}" y="${y}" width="${x2-x1}" height="9" rx="2" fill="var(--table)"/>
+    <rect x="${x1+12}" y="${y+9}" width="7" height="${190-y}" fill="var(--table-dark)"/>
+    <rect x="${x2-19}" y="${y+9}" width="7" height="${190-y}" fill="var(--table-dark)"/>`;
+}
+function obj(kind, st, cx, base){
+  const lifted = st==="lifted" ? -18 : 0, b = base+lifted;
+  if(kind==="takeout"){
+    const top = st==="open"
+      ? `<path d="M${cx-20} ${b-46} l-10 -12 M${cx+20} ${b-46} l10 -12" stroke="var(--bag-line)" stroke-width="2" fill="none"/><ellipse cx="${cx}" cy="${b-46}" rx="16" ry="5" fill="var(--kraft)"/>`
+      : `<rect x="${cx-20}" y="${b-52}" width="40" height="8" fill="var(--bag)" stroke="var(--bag-line)" stroke-width="1.5"/>`;
+    return `<rect x="${cx-20}" y="${b-46}" width="40" height="46" fill="var(--bag)" stroke="var(--bag-line)" stroke-width="1.5"/>${top}<circle cx="${cx}" cy="${b-22}" r="7" fill="none" stroke="var(--bag-line)" stroke-width="1.5"/>`;
+  }
+  if(kind==="kraft"){
+    const top = st==="open" ? `<path d="M${cx-16} ${b-40} q16 -14 32 0" fill="none" stroke="var(--kraft)" stroke-width="3"/>` : `<path d="M${cx-16} ${b-40} l4 -6 l4 6 l4 -6 l4 6 l4 -6 l4 6 l4 -6 l4 6" fill="none" stroke="var(--table-dark)" stroke-width="1.5"/>`;
+    return `<rect x="${cx-16}" y="${b-40}" width="32" height="40" fill="var(--kraft)"/>${top}`;
+  }
+  if(kind==="snacks"){
+    const spill = st==="open" ? `<circle cx="${cx+30}" cy="${b-4}" r="4" fill="var(--kraft)"/><circle cx="${cx+40}" cy="${b-3}" r="3.5" fill="var(--kraft)"/>` : "";
+    return `<path d="M${cx-18} ${b} L${cx-22} ${b-44} L${cx+22} ${b-44} L${cx+18} ${b} Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/><path d="M${cx-22} ${b-44} q22 ${st==="open"?-14:-4} 44 0" fill="none" stroke="var(--accent)" stroke-width="1.5"/><rect x="${cx-10}" y="${b-30}" width="20" height="12" rx="3" fill="var(--accent)" opacity=".5"/>${spill}`;
+  }
+  if(kind==="phone"){
+    return `<rect x="${cx-11}" y="${b-34}" width="22" height="34" rx="4" fill="var(--phone)"/>
+      <rect x="${cx-8}" y="${b-30}" width="16" height="26" rx="2" fill="var(--glow)"/>
+      <rect x="${cx-6}" y="${b-26}" width="12" height="3" rx="1" fill="var(--phone)" opacity=".5"/><rect x="${cx-6}" y="${b-21}" width="8" height="3" rx="1" fill="var(--phone)" opacity=".5"/>`;
+  }
+  return "";
+}
+function sceneSVG(s, st){
+  st = st || "base";
+  const W=360,H=200; let g="";
+  g += `<rect width="${W}" height="${H}" fill="var(--wall)"/><rect y="150" width="${W}" height="50" fill="var(--floor)"/>`;
+  const who = nm(s.npc==="cow"?"cow":s.npc);
+  if(s.setting==="room"||s.setting==="room2"){
+    g += `<rect x="30" y="26" width="70" height="56" rx="3" fill="var(--surface)" stroke="var(--line)"/><line x1="65" y1="26" x2="65" y2="82" stroke="var(--line)"/>`;
+    if(s.setting==="room2") g += `<rect x="20" y="118" width="80" height="34" rx="8" fill="var(--npc-head)" opacity=".55"/>`;
+    g += table(120,280,130) + obj(s.object, st, 200, 130);
+    g += person(st==="base"?318:300, 74, who);
+  } else if(s.setting==="office"){
+    g += `<rect x="40" y="40" width="10" height="112" fill="var(--line)"/><rect x="40" y="40" width="200" height="10" fill="var(--line)"/>`;
+    g += `<rect x="150" y="80" width="56" height="36" rx="3" fill="var(--phone)"/><rect x="175" y="116" width="6" height="14" fill="var(--phone)"/>`;
+    g += table(70,300,130) + obj(s.object, st, 110, 130);
+    g += person(258, 72, who);
+    g += `<rect x="270" y="58" width="6" height="16" rx="2" fill="var(--phone)"/>`;
+  } else if(s.setting==="kitchen"){
+    g += `<rect x="60" y="20" width="130" height="170" rx="6" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>`;
+    g += `<line x1="70" y1="78" x2="180" y2="78" stroke="var(--line)" stroke-width="2"/><line x1="70" y1="128" x2="180" y2="128" stroke="var(--line)" stroke-width="2"/>`;
+    g += `<rect x="78" y="56" width="22" height="22" rx="2" fill="var(--kraft)"/><rect x="150" y="100" width="18" height="28" rx="3" fill="var(--npc-head)"/>`;
+    const lift = st==="lifted"?-16:0, by = 128+lift, ox = st==="open"?0:0;
+    g += `<path d="M${112+ox} ${by} q-4 -32 14 -36 q18 4 14 36 Z" fill="var(--bag)" stroke="var(--bag-line)" stroke-width="1.5" opacity=".95"/>`;
+    [[122,by-10],[130,by-14],[126,by-20],[134,by-8]].forEach(p=>g+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--accent)" opacity=".55"/>`);
+    if(st==="open") g += `<circle cx="146" cy="${by-4}" r="4" fill="var(--accent)" opacity=".55"/>`;
+    g += `<rect x="196" y="40" width="80" height="20" rx="3" fill="var(--note-soft)" stroke="var(--line)"/><text x="236" y="54" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="var(--font)">${state.lang==="zh"?"周五统一清理":"Cleared Fridays"}</text>`;
+    if(st!=="base") g += person(300, 74, who);
+  } else if(s.setting==="cafe"){
+    g += `<rect x="210" y="70" width="140" height="80" fill="var(--table-dark)" opacity=".5"/><rect x="210" y="66" width="140" height="8" fill="var(--table)"/>`;
+    g += `<rect x="236" y="40" width="34" height="26" rx="2" fill="var(--surface)" stroke="var(--line)"/>`;
+    g += table(40,200,132) + obj("phone", st, 130, 132);
+    g += `<path d="M78 132 l3 -18 h18 l3 18 Z" fill="var(--surface)" stroke="var(--line)"/>`;
+    if(st==="base") g += person(300, 88, who); else g += person(180, 74, who);
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(L(s.sit))}">${g}</svg>`;
+}
+
+/* ================= flow ================= */
+function startTrial(){
+  const s = sc();
+  state.cur = { session_id:state.sessionId, round:state.round, scenario_id:s.id, domain:s.domain, difficulty:s.d,
+    prompt_level:LEVEL_NAME[state.level], level:state.level, transfer_trial:s.transfer, intention:null,
+    paused:0, pause_forced: state.level===3?1:0, owner_answer:null, perspective_answer:null, uncertain_used:0,
+    choice:null, correctness:null, response_time_ms:null, repair_used:0, repair_choice:null, repair_success:null,
+    hint_used: state.level>0?1:0, t0:null, ts:new Date().toISOString() };
+  go("scene");
+}
+function go(screen){ state.screen=screen; state.pick=null; render(); }
+function finishTrial(){
+  const c = state.cur, ok = c.correctness===1;
+  delete c.t0;
+  state.trials.push(c);
+  if(state.settings.adaptive){
+    if(ok){ state.streak++; if(state.streak>=state.settings.fadeAfter && state.level>0){ state.level--; state.streak=0; } }
+    else { state.streak=0; if(state.level<3) state.level++; }
+  }
+  renderFac();
+}
+
+/* ================= rendering: player ================= */
+const $screen = document.getElementById("screen");
+const $phone = document.getElementById("phone");
+
+function dotsHTML(){
+  if(state.screen==="home"||state.screen==="end") return "";
+  return state.order.map((_,i)=>`<i class="${i<state.idx?"done":i===state.idx?"now":""}"></i>`).join("");
+}
+function bubble(who, text){ return `<div class="bubble"><span class="who">${esc(who)}</span>${esc(text)}</div>`; }
+function choiceList(opts, name){
+  return `<div class="choices">${opts.map(o=>`<button type="button" class="choice${state.pick===o.id?" picked":""}" data-${name}="${esc(o.id)}" ${state.pick?"disabled":""}>${esc(L(o.l))}</button>`).join("")}</div>`;
+}
+function holdBtn(){
+  return `<button type="button" class="hold" id="holdBtn" aria-label="${esc(T("pauseQuiet"))}">
+    <svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="30" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="3"/><circle id="holdRing" cx="33" cy="33" r="30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" transform="rotate(-90 33 33)"/></svg>
+    <span class="bars"><i></i><i></i></span></button>`;
+}
+
+function render(){
+  const s = state.cur ? SC.find(x=>x.id===state.cur.scenario_id) : sc();
+  const inPause = ["owner","persp"].includes(state.screen);
+  $phone.classList.toggle("in-pause", inPause);
+  document.getElementById("dots").innerHTML = dotsHTML();
+  document.getElementById("phoneLabel").textContent = (state.screen==="home"||state.screen==="end") ? "" :
+    (state.lang==="zh" ? `场景 ${state.idx+1} / ${state.order.length}` : `Situation ${state.idx+1} of ${state.order.length}`);
+  let h = "";
+  switch(state.screen){
+    case "home":
+      h = `<div class="home-mark" aria-hidden="true"><i></i><i></i></div>
+        <h2 style="font-size:30px">${state.lang==="zh"?"停一下":"Social Pause"}</h2>
+        <p class="lead">${esc(T("tagline"))}</p>
+        <p class="small">${esc(T("homeHow"))}</p>
+        <div class="spacer"></div>
+        <p class="small">${esc(T("homeMeta"))}</p>
+        <button type="button" class="primary" id="startBtn">${esc(T("start"))}</button>`;
+      break;
+    case "scene":
+      h = `<div class="scene">${sceneSVG(s,"base")}</div><p class="lead">${esc(L(s.sit))}</p><div class="spacer"></div>
+        <button type="button" class="primary" data-go="intention">${esc(T("cont"))}</button>`;
+      break;
+    case "intention":
+      h = `<div class="scene">${sceneSVG(s,"base")}</div><h2>${esc(T("intentQ"))}</h2>
+        ${choiceList([{id:"curious",l:s.intent},{id:"other",l:UI.intentOther}],"intent")}`;
+      break;
+    case "decide": {
+      const c = state.cur, lv = state.level;
+      if(c.t0==null) c.t0 = performance.now();
+      const head = c.paused ? T("decideAfter") : (c.intention==="curious" ? T("decideCurious") : T("decideOther"));
+      h = `<div class="scene">${sceneSVG(s,"base")}</div>`;
+      if(lv===3 && !c.paused){
+        h += `<div class="explicit"><strong>${esc(T("explicit"))}</strong>${holdBtn()}<span class="small" style="color:var(--pause-muted)">${esc(state.settings.tapPause?T("pauseTapLoud"):T("explicitHint"))}</span></div>`;
+      } else {
+        if(lv===1 && !c.paused) h += bubble(nm(s.cue.who), L(s.cue));
+        h += `<h2>${esc(head)}</h2>`;
+        if(c.paused) h += `<span class="paused-chip">⏸ ${esc(T("pausedChip"))}</span>`;
+        else h += `<div class="pausebar ${lv===2?"loud":"quiet"}">${holdBtn()}<span class="plabel">${esc(lv===2?(state.settings.tapPause?T("pauseTapLoud"):T("pauseLoud")):T("pauseQuiet"))}</span></div>`;
+        h += choiceList(s.actions,"act");
+      }
+      break; }
+    case "owner": case "persp": {
+      const q = state.screen==="owner" ? s.owner : s.persp;
+      const picked = state.pick ? q.opts.find(o=>o.id===state.pick) : null;
+      h = `<div class="pause-hero" aria-hidden="true"><div class="mark"><i></i><i></i></div><span>${esc(T("pauseWord"))}</span></div>
+        <h2>${esc(L(q.q))}</h2>${choiceList(q.opts,"q")}`;
+      if(picked) h += `<p class="reply">${esc(L(picked.r))}</p><div class="spacer"></div>
+        <button type="button" class="primary" data-go="${state.screen==="owner"?"persp":"decide"}">${esc(state.screen==="owner"?T("cont"):T("backToScene"))}</button>`;
+      break; }
+    case "consequence": {
+      const a = s.actions.find(x=>x.id===state.cur.choice);
+      h = `<div class="scene">${sceneSVG(s,a.state)}</div>`;
+      if(a.narr) h += `<p class="narr">${esc(L(a.narr))}</p>`;
+      if(a.npc) h += bubble(nm(a.who||s.npc), L(a.npc));
+      h += `<div class="spacer"></div><button type="button" class="primary" data-go="${a.ok?"feedback":"repair"}">${esc(a.ok?T("cont"):T("whatNext"))}</button>`;
+      break; }
+    case "repair": {
+      const a = s.actions.find(x=>x.id===state.cur.choice), reps = a.repair||s.repair;
+      const picked = state.pick ? reps.find(r=>r.id===state.pick) : null;
+      h = `<div class="scene">${sceneSVG(s,a.state)}</div><h2>${esc(T("whatNext"))}</h2>${choiceList(reps,"rep")}`;
+      if(picked){
+        if(picked.narr) h += `<p class="narr">${esc(L(picked.narr))}</p>`;
+        if(picked.npc) h += bubble(nm(picked.who||a.who||s.npc), L(picked.npc));
+        h += `<button type="button" class="primary" data-go="feedback">${esc(T("cont"))}</button>`;
+      }
+      break; }
+    case "feedback": {
+      const c = state.cur, ok = c.correctness===1;
+      let notice;
+      if(ok) notice = (c.paused && !c.pause_forced ? T("selfPaused")+" " : "") + L(s.fb.notice);
+      else notice = c.repair_success ? T("repaired") : "";
+      const last = state.idx===state.order.length-1;
+      h = `<div class="fb">
+        ${notice?`<div class="row"><span class="k">${esc(T("fbNotice"))}</span><span>${esc(notice)}</span></div>`:""}
+        <div class="row"><span class="k">${esc(T("fbWhy"))}</span><span>${esc(L(s.fb.why))}</span></div>
+        ${!ok?`<div class="row"><span class="k">${esc(T("fbNext"))}</span><span>${esc(L(s.fb.next))}</span></div>`:""}
+      </div>
+      <div class="learn">${esc(L(s.learn))}</div>
+      <div class="spacer"></div>
+      <button type="button" class="primary" id="nextBtn">${esc(last?T("finish"):T("next"))}</button>`;
+      break; }
+    case "end": {
+      const r = state.trials.filter(t=>t.round===state.round && t.session_id===state.sessionId);
+      const n = r.length, paused = r.filter(t=>t.paused).length, ok = r.filter(t=>t.correctness===1).length, rep = r.filter(t=>t.repair_success).length;
+      const unit = T("times");
+      h = `<h2>${esc(T("endTitle"))}</h2>
+        <div><div class="stat-line"><span>${esc(T("endPaused"))}</span><b>${paused}<span class="small"> / ${n}</span></b></div>
+        <div class="stat-line"><span>${esc(T("endAsked"))}</span><b>${ok}<span class="small"> / ${n}</span></b></div>
+        ${r.some(t=>t.repair_used)?`<div class="stat-line"><span>${esc(T("endRepair"))}</span><b>${rep}</b></div>`:""}</div>
+        <p class="sec-label" style="margin-top:6px">${esc(T("takeaways"))}</p>
+        <div class="choices">${state.order.map(i=>`<div class="small" style="color:var(--ink)">· ${esc(L(SC[i].learn))}</div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button type="button" class="primary" id="againBtn">${esc(T("again"))}</button>
+        <button type="button" class="ghost" id="homeBtn">${esc(T("home"))}</button>`;
+      break; }
+  }
+  $screen.innerHTML = h;
+  wire();
+}
+
+function wire(){
+  const q = sel => $screen.querySelector(sel);
+  q("#startBtn")?.addEventListener("click", ()=>{ state.idx=0; state.level=state.settings.startLevel; state.streak=0; startTrial(); });
+  $screen.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+  $screen.querySelectorAll("[data-intent]").forEach(b=>b.addEventListener("click",()=>{ state.cur.intention=b.dataset.intent; go("decide"); }));
+  $screen.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.q; state.pick=id;
+    if(state.screen==="owner") state.cur.owner_answer=id; else state.cur.perspective_answer=id;
+    if(id==="unsure") state.cur.uncertain_used=1;
+    render();
+  }));
+  $screen.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>{
+    const s=SC.find(x=>x.id===state.cur.scenario_id), a=s.actions.find(x=>x.id===b.dataset.act), c=state.cur;
+    c.choice=a.id; c.correctness=a.ok; c.response_time_ms=Math.round(performance.now()-c.t0);
+    go("consequence");
+  }));
+  $screen.querySelectorAll("[data-rep]").forEach(b=>b.addEventListener("click",()=>{
+    const s=SC.find(x=>x.id===state.cur.scenario_id), a=s.actions.find(x=>x.id===state.cur.choice), r=(a.repair||s.repair).find(x=>x.id===b.dataset.rep);
+    state.cur.repair_used=1; state.cur.repair_choice=r.id; state.cur.repair_success=r.ok; state.pick=r.id; render();
+  }));
+  q("#nextBtn")?.addEventListener("click",()=>{
+    finishTrial();
+    if(state.idx<state.order.length-1){ state.idx++; startTrial(); } else { state.cur=null; go("end"); }
+  });
+  q("#againBtn")?.addEventListener("click",()=>{
+    state.round++; const head=[0,1,2,3].sort(()=>Math.random()-.5); state.order=[...head,4]; state.idx=0; startTrial();
+  });
+  q("#homeBtn")?.addEventListener("click",()=>{ state.cur=null; go("home"); });
+  const hb = q("#holdBtn"); if(hb) wireHold(hb);
+}
+
+function wireHold(btn){
+  const ring = btn.querySelector("#holdRing"), C = 188.5;
+  let start=null, raf=null, done=false;
+  const complete = ()=>{ done=true; state.cur.paused=1; setTimeout(()=>go("owner"), 120); };
+  const tick = t=>{ if(start==null) return; const p=Math.min(1,(t-start)/HOLD_MS); ring.style.strokeDashoffset=C*(1-p); if(p>=1){ start=null; complete(); } else raf=requestAnimationFrame(tick); };
+  const down = e=>{ if(done) return; if(state.settings.tapPause){ ring.style.strokeDashoffset=0; complete(); return; } e.preventDefault(); start=performance.now(); raf=requestAnimationFrame(tick); };
+  const up = ()=>{ if(done) return; start=null; cancelAnimationFrame(raf); ring.style.strokeDashoffset=C; };
+  btn.addEventListener("pointerdown", down);
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>btn.addEventListener(ev, up));
+  btn.addEventListener("keydown", e=>{ if((e.key===" "||e.key==="Enter") && !e.repeat){ down(e); } });
+  btn.addEventListener("keyup", e=>{ if(e.key===" "||e.key==="Enter") up(); });
+  btn.addEventListener("contextmenu", e=>e.preventDefault());
+}
+
+/* ================= facilitator ================= */
+const EXAMPLE = [
+  {scenario_id:"food_bag_01",difficulty:1,prompt_level:"P3",level:3,paused:1,pause_forced:1,choice:"ask_look",correctness:1,response_time_ms:11840,repair_used:0,repair_success:null,transfer_trial:0,uncertain_used:0},
+  {scenario_id:"food_bag_02",difficulty:2,prompt_level:"P2",level:2,paused:1,pause_forced:0,choice:"wait_ask",correctness:1,response_time_ms:9310,repair_used:0,repair_success:null,transfer_trial:0,uncertain_used:0},
+  {scenario_id:"food_bag_03",difficulty:3,prompt_level:"P1",level:1,paused:0,pause_forced:0,choice:"eat",correctness:0,response_time_ms:3120,repair_used:1,repair_success:1,transfer_trial:0,uncertain_used:0},
+  {scenario_id:"food_bag_04",difficulty:4,prompt_level:"P2",level:2,paused:1,pause_forced:0,choice:"ask",correctness:1,response_time_ms:10450,repair_used:0,repair_success:null,transfer_trial:0,uncertain_used:1},
+  {scenario_id:"phone_01",difficulty:5,prompt_level:"P1",level:1,paused:0,pause_forced:0,choice:"tell",correctness:1,response_time_ms:6020,repair_used:0,repair_success:null,transfer_trial:1,uncertain_used:0}
+];
+const F = {
+  title:{zh:"协助者面板",en:"Facilitator panel"},
+  sub:{zh:"玩家看不到这里。分数只给你看，不给玩家看。",en:"The player never sees this. Scores are for you, not the player."},
+  setup:{zh:"设置",en:"Setup"},
+  startLv:{zh:"起始提示级别",en:"Starting prompt level"},
+  adaptive:{zh:"自动淡出提示（做对降一级，做错升一级）",en:"Fade prompts automatically (down on success, up on a miss)"},
+  fadeAfter:{zh:"连续做对几次再降一级",en:"Successes before fading one level"},
+  tap:{zh:"点一下即可暂停（替代按住）",en:"Tap to pause instead of press-and-hold"},
+  reset:{zh:"开始新会话",en:"Start new session"},
+  levels:{zh:"P3 明确指令 · P2 视觉提示 · P1 情境线索 · P0 无提示",en:"P3 explicit · P2 visual · P1 contextual cue · P0 none"},
+  ladder:{zh:"提示级别轨迹",en:"Prompt level by trial"},
+  exampleFlag:{zh:"示例数据 · 玩一个场景后换成真实记录",en:"Example data · replaced once a situation is played"},
+  isr:{zh:"独立正确率 ISR",en:"Independent response rate"},
+  isrD:{zh:"P0 正确 ÷ P0 次数",en:"P0 correct ÷ P0 trials"},
+  spont:{zh:"主动暂停率",en:"Spontaneous pause rate"},
+  spontD:{zh:"P2–P0 中自己按了暂停",en:"self-initiated pause, P2–P0"},
+  dep:{zh:"提示依赖",en:"Prompt dependence"},
+  depD:{zh:"做对时的平均级别",en:"mean level when correct"},
+  acc:{zh:"行动正确率",en:"Action accuracy"},
+  accD:{zh:"合适行动 ÷ 全部",en:"appropriate ÷ all"},
+  rep:{zh:"补救成功",en:"Repair success"},
+  repD:{zh:"合适补救 ÷ 失误",en:"good repair ÷ missteps"},
+  rt:{zh:"反应时间中位数",en:"Median response time"},
+  rtD:{zh:"看到选项 → 选择",en:"options shown → choice"},
+  ledger:{zh:"逐次记录",en:"Trial log"},
+  cols:{zh:["#","场景","难度","级别","暂停","选择","合适","用时","补救"],en:["#","Situation","Diff","Level","Paused","Choice","OK","Time","Repair"]},
+  forced:{zh:"引导",en:"guided"},
+  self:{zh:"自己",en:"self"},
+  export:{zh:"导出",en:"Export"},
+  copyJ:{zh:"复制 JSON",en:"Copy JSON"}, copyC:{zh:"复制 CSV",en:"Copy CSV"},
+  copied:{zh:"已复制",en:"Copied"}, copyFail:{zh:"无法自动复制，已在下方选中，请手动复制。",en:"Couldn't copy automatically. The text is selected below; copy it by hand."},
+  legOk:{zh:"合适",en:"appropriate"}, legNo:{zh:"不合适",en:"not appropriate"}, legP:{zh:"自己暂停",en:"self-paused"},
+  na:{zh:"P0 还没出现",en:"no P0 trials yet"}
+};
+const FL = k => L(F[k]);
+const $fac = document.getElementById("fac");
+let exportText = "";
+
+function pct(a,b){ return b ? Math.round(100*a/b)+"%" : "—"; }
+function metrics(rows){
+  const p0 = rows.filter(r=>r.level===0), nonForced = rows.filter(r=>r.level<3), okRows = rows.filter(r=>r.correctness===1), miss = rows.filter(r=>r.repair_used);
+  const rts = rows.map(r=>r.response_time_ms).filter(x=>x!=null).sort((a,b)=>a-b);
+  const med = rts.length ? (rts.length%2 ? rts[(rts.length-1)/2] : (rts[rts.length/2-1]+rts[rts.length/2])/2) : null;
+  return {
+    isr:[pct(p0.filter(r=>r.correctness===1).length,p0.length), `${p0.filter(r=>r.correctness===1).length}/${p0.length}`],
+    spont:[pct(nonForced.filter(r=>r.paused).length,nonForced.length), `${nonForced.filter(r=>r.paused).length}/${nonForced.length}`],
+    dep:[okRows.length ? "P"+(okRows.reduce((s,r)=>s+r.level,0)/okRows.length).toFixed(1) : "—", `n=${okRows.length}`],
+    acc:[pct(okRows.length,rows.length), `${okRows.length}/${rows.length}`],
+    rep:[pct(miss.filter(r=>r.repair_success).length,miss.length), `${miss.filter(r=>r.repair_success).length}/${miss.length}`],
+    rt:[med!=null ? (med/1000).toFixed(1)+"s" : "—", `n=${rts.length}`]
+  };
+}
+function ladderSVG(rows){
+  const W=320,H=128,padL=30,padR=12,padT=12,padB=24, n=Math.max(rows.length,5);
+  const x = i => padL + (n===1?0:(W-padL-padR)*i/(n-1));
+  const y = lv => padT + (H-padT-padB)*(3-lv)/3;
+  let g = "";
+  [3,2,1,0].forEach(lv=>{ g+=`<line x1="${padL}" x2="${W-padR}" y1="${y(lv)}" y2="${y(lv)}" stroke="var(--line)" stroke-width="1"/><text x="${padL-8}" y="${y(lv)+4}" text-anchor="end" font-size="10" font-family="var(--mono)" fill="var(--muted)">P${lv}</text>`; });
+  for(let i=0;i<n;i++) g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="10" font-family="var(--mono)" fill="var(--muted)">${i+1}</text>`;
+  if(rows.length>1){
+    let d = `M${x(0)} ${y(rows[0].level)}`;
+    rows.forEach((r,i)=>{ if(i>0) d+=` H${x(i)} V${y(r.level)}`; });
+    g += `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" opacity=".55"/>`;
+  }
+  rows.forEach((r,i)=>{
+    const cx=x(i), cy=y(r.level);
+    g += r.correctness===1 ? `<circle cx="${cx}" cy="${cy}" r="5.5" fill="var(--accent)"/>` : `<circle cx="${cx}" cy="${cy}" r="5" fill="var(--surface)" stroke="var(--note)" stroke-width="2"/>`;
+    if(r.paused && !r.pause_forced) g += `<rect x="${cx-4}" y="${cy-17}" width="2.5" height="7" fill="var(--ink)"/><rect x="${cx+1.5}" y="${cy-17}" width="2.5" height="7" fill="var(--ink)"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(FL("ladder"))}">${g}</svg>`;
+}
+function toCSV(rows){
+  const keys=["session_id","round","scenario_id","domain","difficulty","prompt_level","transfer_trial","intention","paused","pause_forced","owner_answer","perspective_answer","uncertain_used","choice","correctness","response_time_ms","repair_used","repair_choice","repair_success","hint_used","ts"];
+  return [keys.join(",")].concat(rows.map(r=>keys.map(k=>r[k]==null?"":String(r[k]).replace(/,/g,";")).join(","))).join("\n");
+}
+
+function renderFac(){
+  const real = state.trials.length>0, rows = real ? state.trials : EXAMPLE.map(r=>({...r}));
+  const m = metrics(rows), st = state.settings;
+  const tile = (k,key) => `<div class="tile${key?" key":""}"><span class="t">${esc(FL(k))}</span><span class="v">${esc(m[k][0])}</span><span class="d">${esc(m[k][1])} · ${esc(FL(k+"D"))}</span></div>`;
+  const cols = FL("cols");
+  const scName = id => id.replace("food_bag_","bag_");
+  $fac.innerHTML = `
+    <div class="fac-head"><h2>${esc(FL("title"))}</h2><span class="small">${esc(FL("sub"))}</span></div>
+    <div>
+      <p class="sec-label">${esc(FL("setup"))}</p>
+      <div class="controls">
+        <div class="ctl"><span>${esc(FL("startLv"))}</span>
+          <div class="seg" role="group">${[3,2,1,0].map(l=>`<button type="button" id="lv-${l}" data-lv="${l}" aria-pressed="${st.startLevel===l}">P${l}</button>`).join("")}</div>
+          <span class="small" style="font-size:12px">${esc(FL("levels"))}</span></div>
+        <div class="ctl"><span>${esc(FL("fadeAfter"))}</span>
+          <div class="seg" role="group">${[1,2,3].map(n=>`<button type="button" id="fa-${n}" data-fa="${n}" aria-pressed="${st.fadeAfter===n}">${n}</button>`).join("")}</div></div>
+        <label class="tog"><input type="checkbox" id="adaptiveTog" ${st.adaptive?"checked":""}>${esc(FL("adaptive"))}</label>
+        <label class="tog"><input type="checkbox" id="tapTog" ${st.tapPause?"checked":""}>${esc(FL("tap"))}</label>
+      </div>
+      <div class="exports" style="margin-top:12px"><button type="button" id="resetBtn">${esc(FL("reset"))}</button>
+        <span class="status">${esc(state.sessionId)} · ${state.lang==="zh"?"当前级别":"current level"} <span class="lv">P${state.level}</span></span></div>
+    </div>
+    ${real?"":`<div><span class="example-flag">${esc(FL("exampleFlag"))}</span></div>`}
+    <div class="tiles">${tile("isr",true)}${tile("spont",true)}${tile("dep",true)}${tile("acc")}${tile("rep")}${tile("rt")}</div>
+    <div>
+      <p class="sec-label">${esc(FL("ladder"))}</p>
+      <div class="chart">${ladderSVG(rows)}
+        <div class="legend"><span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--accent)"/></svg>${esc(FL("legOk"))}</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="var(--surface)" stroke="var(--note)" stroke-width="2"/></svg>${esc(FL("legNo"))}</span>
+        <span><svg width="12" height="12"><rect x="2" y="2" width="3" height="8" fill="var(--ink)"/><rect x="7" y="2" width="3" height="8" fill="var(--ink)"/></svg>${esc(FL("legP"))}</span></div>
+      </div>
+    </div>
+    <div>
+      <p class="sec-label">${esc(FL("ledger"))}</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th class="num">${cols[0]}</th><th>${cols[1]}</th><th class="num">${cols[2]}</th><th>${cols[3]}</th><th>${cols[4]}</th><th>${cols[5]}</th><th>${cols[6]}</th><th class="num">${cols[7]}</th><th>${cols[8]}</th></tr></thead>
+        <tbody>${rows.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${esc(scName(r.scenario_id))}${r.transfer_trial?" ↗":""}</td><td class="num">${r.difficulty}</td><td><span class="lv">${r.prompt_level}</span></td>
+          <td>${r.paused?(r.pause_forced?esc(FL("forced")):"<b>"+esc(FL("self"))+"</b>"):"—"}</td><td>${esc(r.choice)}</td>
+          <td class="${r.correctness?"ok":"no"}">${r.correctness?"✓":"·"}</td><td class="num">${(r.response_time_ms/1000).toFixed(1)}s</td>
+          <td>${r.repair_used?(r.repair_success?"✓":"·"):"—"}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </div>
+    <div>
+      <p class="sec-label">${esc(FL("export"))}</p>
+      <div class="exports"><button type="button" id="cpJson" ${real?"":"disabled"}>${esc(FL("copyJ"))}</button><button type="button" id="cpCsv" ${real?"":"disabled"}>${esc(FL("copyC"))}</button><span class="status" id="cpStatus"></span></div>
+      <textarea id="exportBox" readonly hidden aria-label="export"></textarea>
+    </div>`;
+  wireFac();
+}
+function wireFac(){
+  const q = s => $fac.querySelector(s);
+  $fac.querySelectorAll("[data-lv]").forEach(b=>b.addEventListener("click",()=>{ state.settings.startLevel=+b.dataset.lv; if(state.screen==="home"||state.screen==="end") state.level=state.settings.startLevel; renderFac(); }));
+  $fac.querySelectorAll("[data-fa]").forEach(b=>b.addEventListener("click",()=>{ state.settings.fadeAfter=+b.dataset.fa; renderFac(); }));
+  q("#adaptiveTog").addEventListener("change",e=>{ state.settings.adaptive=e.target.checked; });
+  q("#tapTog").addEventListener("change",e=>{ state.settings.tapPause=e.target.checked; if(state.screen==="decide") render(); });
+  q("#resetBtn").addEventListener("click",()=>{ Object.assign(state,{sessionId:newId(),round:1,order:[0,1,2,3,4],idx:0,level:state.settings.startLevel,streak:0,trials:[],cur:null}); go("home"); renderFac(); });
+  const copy = fmt => {
+    const rows = state.trials; exportText = fmt==="json" ? JSON.stringify(rows,null,2) : toCSV(rows);
+    const box = q("#exportBox"), status = q("#cpStatus");
+    const fallback = ()=>{ box.hidden=false; box.value=exportText; box.focus(); box.select(); status.textContent=FL("copyFail"); };
+    try{ navigator.clipboard.writeText(exportText).then(()=>{ status.textContent=FL("copied"); box.hidden=true; }, fallback); }catch(e){ fallback(); }
+  };
+  q("#cpJson").addEventListener("click",()=>copy("json"));
+  q("#cpCsv").addEventListener("click",()=>copy("csv"));
+}
+
+/* ================= language + boot ================= */
+function setLang(l){
+  state.lang=l; try{ localStorage.setItem("sp_lang",l); }catch(e){}
+  document.documentElement.lang = l==="zh" ? "zh-CN" : "en";
+  document.getElementById("lang-zh").setAttribute("aria-pressed", l==="zh");
+  document.getElementById("lang-en").setAttribute("aria-pressed", l==="en");
+  document.getElementById("verTag").textContent = l==="zh" ? "原型 0.1 · 食物袋场景" : "prototype 0.1 · food bag";
+  render(); renderFac();
+}
+document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.lang)));
+
+function start(data){
+  if(data && data.state){ Object.assign(state, data.state); }
+  setLang(state.lang);
+}
+/* long-press the title (0.8 s) to show or hide the facilitator panel on a phone */
+(function(){
+  const t=document.getElementById("brandName"); let timer=null;
+  const on=()=>{ timer=setTimeout(()=>{ document.body.classList.toggle("fac-open"); if(document.body.classList.contains("fac-open")) document.getElementById("fac").scrollIntoView({behavior:"smooth"}); },800); };
+  const off=()=>clearTimeout(timer);
+  t.addEventListener("pointerdown",on); ["pointerup","pointerleave","pointercancel"].forEach(e=>t.addEventListener(e,off));
+  t.addEventListener("contextmenu",e=>e.preventDefault());
+})();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+window.claude?.hot?.snapshot?.(()=>({state:JSON.parse(JSON.stringify(state))}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body>
+</html>
