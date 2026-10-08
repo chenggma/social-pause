@@ -1,5 +1,5 @@
 // Offline support: app files are cached on first visit; fonts are cached as they load.
-const CACHE = "social-pause-v1";
+const CACHE = "social-pause-v2";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

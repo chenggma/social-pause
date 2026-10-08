@@ -1,7 +1,7 @@
 {
   "name": "social-pause",
   "productName": "Social Pause",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Social Pause prototype 0.1 — practice pausing before acting in everyday social situations.",
   "main": "main.js",
   "private": true,
